@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'health_modules/search.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -52,22 +54,16 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(80),
-        child: AppBar(
-        centerTitle: true,
+      appBar: AppBar(
+        // centerTitle: true,
         // TRY THIS: Try changing the color here to a specific color (to
         // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
         // change color while the other colors stay the same.
         //backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Padding(
-          padding: const EdgeInsets.only(top: 40),
-          child: Text(widget.title, style: Theme.of(context).textTheme.headlineMedium),
+        // title: Image.asset('assets/images/wired-logo.png'),
         ),
-        ),
-      ),
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
@@ -85,23 +81,81 @@ class _MyHomePageState extends State<MyHomePage> {
           // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
           // action in the IDE, or press "p" in the console), to see the
           // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
+          //mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Image.asset('assets/images/wired-logo.png'),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+            const Text(
+              'CME Module Library',
+              style: TextStyle(
+                fontSize: 38,
+                fontWeight: FontWeight.w500,
+                color: Color.fromRGBO(0, 102, 179, 1),
+              ),
+            ),
+            const SizedBox(height: 40),
+            const Text(
+              'News and Updates',
+              style: TextStyle(
+                fontSize: 42,
+                fontWeight: FontWeight.w600,
+                color: Color.fromRGBO(84, 130, 53, 1),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(18.0),
+              child: Container(
+                height: 200,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(7),
+                  border: Border.all(
+                    color: Colors.blue,
+                    width: 2,
+                  ),
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.all(15.0),
+                  child: Text(
+                    'Alerts, Notifications, and Messages',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 20),
+        child: SizedBox(
+          height: 100,
+          width: 200,
+          child: FloatingActionButton.extended(
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => Search()));
+            },
+            highlightElevation: 0,
+            heroTag: 'search',
+            label: const Text(
+              'Search',
+              style: TextStyle(
+                fontSize: 52,
+                fontWeight: FontWeight.w500,
+                color: Colors.white,
+              ),
+            ),
+            backgroundColor: Colors.blue,
+          ),
+        ),
+      ),
     );
   }
 }
