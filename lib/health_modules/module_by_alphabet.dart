@@ -5,8 +5,9 @@ import 'package:http/http.dart' as http;
 
 class ModuleByAlphabet extends StatefulWidget {
   final String letter;
+  final String letterId;
 
-  ModuleByAlphabet({required this.letter});
+  ModuleByAlphabet({required this.letter, required this.letterId});
 
   @override
   _ModuleByAlphabetState createState() => _ModuleByAlphabetState();
@@ -23,6 +24,7 @@ class Modules {
   //String? launchFile;
   //String? packageSize;
   //String? letters;
+  List<String>? letters;
   //String? credits;
   //String? module_name;
   //String? id;
@@ -36,7 +38,7 @@ class Modules {
     this.downloadLink,
     //this.launchFile,
     //this.packageSize,
-    //this.letters,
+    this.letters,
     //this.credits,
     //this.module_name,
     //this.id,
@@ -47,10 +49,11 @@ class Modules {
       //description = json['description'] as String,
       //topics = json['topics'] as String,
       //version = json['version'] as String,
-      downloadLink = json['downloadLink'] as String;
+      downloadLink = json['downloadLink'] as String,
       //launchFile = json['launchFile'] as String,
       //packageSize = json['packageSize'] as String,
       //letters = json['letters'] as String;
+      letters = (json['letters'] as List<dynamic>?)?.map((e) => e as String).toList();
       //credits = json['credits'] as String,
       //module_name = json['module_name'] as String,
       //id = json['id'] as String;
@@ -63,7 +66,7 @@ class Modules {
     'downloadLink': downloadLink,
     //'launchFile': launchFile,
     //'packageSize': packageSize,
-    //'letters': letters,
+    'letters': letters,
     //'credits': credits,
     //'module_name': module_name,
     //'id': id,
@@ -80,7 +83,14 @@ class _ModuleByAlphabetState extends State<ModuleByAlphabet> {
           'https://obrpqbo4eb.execute-api.us-west-2.amazonaws.com/api/modules'));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        moduleData = data.map<Modules>((e) => Modules.fromJson(e)).toList();
+        List<Modules> allModules = data.map<Modules>((e) => Modules.fromJson(e)).toList();
+
+        // Filter modules by the letter
+        moduleData = allModules.where((module) => module.letters?.contains(widget.letterId) ?? false).toList();
+
+        // Sort modules by name
+        moduleData.sort((a, b) => a.name!.compareTo(b.name!));
+
         debugPrint("Module Data: ${moduleData.length}");
         return moduleData;
       } else {
@@ -122,7 +132,7 @@ class _ModuleByAlphabetState extends State<ModuleByAlphabet> {
                 ),
               ),
               child: FutureBuilder<List<Modules>>(
-                future: getModules(),
+                future: futureModules,
                 builder: (context, snapshot) {
                   print("THis is the snapshot ${snapshot.data}");
                   if (snapshot.hasData) {

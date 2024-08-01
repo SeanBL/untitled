@@ -10,20 +10,6 @@ class ByAlphabet extends StatefulWidget {
   _ByAlphabetState createState() => _ByAlphabetState();
 }
 
-Future<List<Album>> fetchAlbums() async {
-  final response = await http.get(Uri.parse('https://obrpqbo4eb.execute-api.us-west-2.amazonaws.com/api/letters'));
-
-  if (response.statusCode == 200) {
-    print("This is the response ${response.body}");
-    Iterable jsonResponse = json.decode(response.body);
-    List<Album> albums = jsonResponse.map((album) => Album.fromJson(album)).toList();
-    albums.sort((a, b) => a.name.compareTo(b.name));
-    return albums;
-  } else {
-    throw Exception('Failed to load album');
-  }
-}
-
 class Album {
   final String description;
   final String id;
@@ -32,28 +18,45 @@ class Album {
   Album({
     required this.description,
     required this.id,
-    required this.name,
+    required this.name
   });
 
-  factory Album.fromJson(Map<String, dynamic> json) {
-    return switch (json) {
-      {
-        "description": String description,
-        "id": String id,
-        "name": String name,
-      } => Album(
-        description: description,
-        id: id,
-        name: name,
-      ),
-      _ => throw Exception('Failed to load album'),
+  Album.fromJson(Map<String, dynamic> json)
+      : description = json['description'] as String,
+        id = json['id'] as String,
+        name = json['name'] as String;
+
+    Map<String, dynamic> toJson() => {
+      'description': description,
+      'id': id,
+      'name': name,
     };
-  }
 }
 
 class _ByAlphabetState extends State<ByAlphabet> {
   late Future<List<Album>> futureAlbums;
-  late List<String> albumNames = [];
+  late List<Album> albums = [];
+
+  Future<List<Album>> fetchAlbums() async {
+    try {
+      final response = await http.get(Uri.parse(
+          'https://obrpqbo4eb.execute-api.us-west-2.amazonaws.com/api/letters'));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        albums = data.map<Album>((e) => Album.fromJson(e)).toList();
+        albums.sort((a, b) => a.name.compareTo(b.name));
+        debugPrint("Album Data: ${albums.length}");
+        return albums;
+      } else {
+        debugPrint("Failed to load albums");
+      }
+      return albums;
+    } catch (e) {
+      debugPrint("$e");
+  }
+  return albums;
+}
 
   @override
   void initState() {
@@ -88,7 +91,7 @@ class _ByAlphabetState extends State<ByAlphabet> {
                 builder: (context, snapshot) {
                   print("THis is the snapshot ${snapshot.data}");
                   if (snapshot.hasData) {
-                    albumNames = snapshot.data!.map((album) => album.name).toList();
+                    //albums = snapshot.data!.map((album) => album.name).toList();
                     return GridView.builder(
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 4,
@@ -96,14 +99,15 @@ class _ByAlphabetState extends State<ByAlphabet> {
                         crossAxisSpacing: 10,
                         childAspectRatio: 3,
                       ),
-                      itemCount: albumNames.length,
+                      itemCount: albums.length,
                       itemBuilder: (context, index) {
                         return InkWell(
                           onTap: () {
-                            print("Album index ${albumNames[index]} was tapped");
+                            print("Album index ${albums[index].name} was tapped");
+                            print("Album index ${albums[index].id} was tapped");
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => ModuleByAlphabet(letter: albumNames[index])),
+                              MaterialPageRoute(builder: (context) => ModuleByAlphabet(letter: albums[index].name, letterId: albums[index].id)),
                             );
                           },
                           child: Container(
@@ -113,7 +117,7 @@ class _ByAlphabetState extends State<ByAlphabet> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
-                              albumNames[index],
+                              albums[index].name,
                               style: TextStyle(color: Colors.white, fontSize: 16),
                             ),
                           ),
